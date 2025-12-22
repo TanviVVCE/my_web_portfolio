@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:my_portfolio/core/utils/common_widgets.dart';
 
-class BlogDetailPage extends StatefulWidget {
-  const BlogDetailPage({super.key});
+class ContactPage extends StatefulWidget {
+  const ContactPage({super.key});
 
   @override
-  State<BlogDetailPage> createState() => _BlogDetailPageState();
+  State<ContactPage> createState() => _ContactPageState();
 }
 
-class _BlogDetailPageState extends State<BlogDetailPage> {
+class _ContactPageState extends State<ContactPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: Row(children: [WidgetCommons().navigationBarClass(context)]));
