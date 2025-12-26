@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
+import 'package:my_portfolio/widgets/quick_action_menu/src/quick_action.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WidgetCommons {
@@ -46,46 +47,66 @@ class WidgetCommons {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            contactBuilder(),
+            // const SizedBox(height: 10),
+            // contactBuilder(context),
           ],
         );
       },
     );
   }
 
-  contactBuilder() {
+  contactBuilder(BuildContext context) {
     final socialLinks = {
-      'assets/logos/linkedin.svg': 'https://www.linkedin.com/in/tanvi-virappa-patil-044796197/',
-      'assets/logos/github.svg': 'https://github.com/TanviVVCE',
-      'assets/logos/google.svg': 'mailto:tanvipatil843@gmail.com',
+      'assets/logos/linkedin.svg': ['https://www.linkedin.com/in/tanvi-virappa-patil-044796197/', 'LinkedIn'],
+      'assets/logos/github.svg': ['https://github.com/TanviVVCE', 'GitHub'],
+      'assets/logos/google.svg': ['mailto:tanvipatil843@gmail.com', 'Contact'],
+      'assets/logos/blog.svg': ['https://tanvis-blogs.hashnode.dev/', 'Blogs'],
     };
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 150, maxHeight: 220, minWidth: 70, maxWidth: 100),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.navigationRailBgColor,
-          border: Border.all(color: AppColors.borderColor),
-          boxShadow: boxShadowswithColors(),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: socialLinks.entries.map((entry) {
-            return MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () async {
-                  final url = entry.value;
-                  if (await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  }
-                },
-                child: SvgPicture.asset(entry.key, width: 30, height: 30),
+    return Container(
+      margin: const EdgeInsets.only(top: 20, left: 20, bottom: 20), // Add controlled margins
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width / 20,
+      decoration: BoxDecoration(
+        color: AppColors.navigationRailBgColor,
+        border: Border.all(color: AppColors.borderColor),
+        boxShadow: boxShadowswithColors(),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: socialLinks.entries.map((entry) {
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () async {
+                final url = entry.value[0];
+                if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
+                  await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                }
+              },
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8), // Add padding for better touch target
+                    child: SvgPicture.asset(
+                      entry.key,
+                      width: 30,
+                      height: 30,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.navigationRailIconColor, // Colorize SVGs to match theme
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    entry.value[1],
+                    style: TextStyle(fontFamily: 'Funnel', color: AppColors.navigationRailIconColor),
+                  ),
+                ],
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -100,8 +121,6 @@ class WidgetCommons {
       label: Text(labelText, style: TextStyle(fontSize: 12, color: AppColors.navigationRailIconColor)),
     );
   }
-
-  // dimensions means parameters ya fir context window ?
 
   Widget contactInfoBuilder() {
     return Padding(
@@ -160,5 +179,37 @@ class WidgetCommons {
     if (width < 600) return 10; // mobile
     if (width < 900) return 12; // tablet
     return 15; // desktop
+  }
+
+  List<QuickAction> getQuickActions(BuildContext context) {
+    return [
+      QuickAction(
+        icon: Icons.code_rounded,
+        backgroundColor: AppColors.navigationRailBgColor,
+        iconColor: AppColors.navigationRailIconColor,
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/projects');
+        },
+      ),
+      QuickAction(
+        icon: Icons.person_rounded,
+        backgroundColor: AppColors.navigationRailBgColor,
+        iconColor: AppColors.navigationRailIconColor,
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/resume');
+        },
+      ),
+      QuickAction(
+        icon: Icons.message,
+        backgroundColor: AppColors.navigationRailBgColor,
+        iconColor: AppColors.navigationRailIconColor,
+        onTap: () async {
+          String url = 'https://tanvis-blogs.hashnode.dev';
+          if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
+            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          }
+        },
+      ),
+    ];
   }
 }
