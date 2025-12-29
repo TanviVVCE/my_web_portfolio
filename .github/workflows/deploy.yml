@@ -2,8 +2,8 @@ name: Deploy Flutter Web to GitHub Pages
 
 on:
   push:
-    branches:
-      - main 
+    branches: 
+      - main
   workflow_dispatch:
 
 permissions:
@@ -14,42 +14,52 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Step 1: Checkout the repository
-      - name:  Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.5'  
+          flutter-version: '3.24.0'
           channel: 'stable'
           cache: true
 
-      # Step 3: Verify Flutter installation
-      - name: Verify Flutter
-        run: |
-          flutter --version
-          flutter doctor -v
+      - name:  Verify Flutter
+        run: flutter doctor -v
 
-      # Step 4: Get dependencies
+      - name: Clean previous builds
+        run: flutter clean
+
       - name: Get Dependencies
         run: flutter pub get
 
-      # Step 5: Build web app
       - name: Build Web App
-        run: flutter build web --release --base-href /my_web_portfolio/
+        run: flutter build web --release --base-href /my_web_portfolio/ --web-renderer canvaskit
 
-      # Step 6: Add . nojekyll file (prevents Jekyll processing)
+      - name:  Verify build output
+        run: |
+          echo "Checking build output..."
+          ls -la build/web/
+          echo "Checking for critical files..."
+          test -f build/web/index.html && echo "index.html exists" || echo "index.html missing"
+          test -f build/web/flutter_bootstrap.js && echo "flutter_bootstrap.js exists" || echo "⚠️  flutter_bootstrap.js missing (might be flutter. js)"
+          test -f build/web/flutter.js && echo "flutter.js exists" || echo "⚠️  flutter.js missing"
+          test -f build/web/manifest.json && echo "manifest.json exists" || echo "manifest.json missing"
+
       - name: Add . nojekyll file
-        run: touch build/web/. nojekyll
+        run:  touch build/web/.nojekyll
 
-      # Step 7: Deploy to GitHub Pages
-      - name:  Deploy to GitHub Pages
-        uses:  peaceiris/actions-gh-pages@v3
-        with: 
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:  
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          user_email: 'github-actions[bot]@users. noreply.github.com'
+          
+      - name: Deployment Summary
+        run: |
+          echo "🎉 Deployment complete!"
+          echo "🌐 Your site will be available at: https://tanvivvce.github.io/my_web_portfolio/"
+          echo "⏱️  Please wait 2-3 minutes for GitHub Pages to update"
