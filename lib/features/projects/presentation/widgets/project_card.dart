@@ -75,6 +75,8 @@ class _ProjectCardState extends State<ProjectCard> with SingleTickerProviderStat
               elevation: _elevationAnimation.value,
               clipBehavior: Clip.antiAlias,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shadowColor: AppColors.navigationRailIconColor,
+              color: AppColors.navigationRailBgColor,
               child: InkWell(
                 onTap: widget.onTap,
                 child: Column(
@@ -138,7 +140,6 @@ class _ProjectCardState extends State<ProjectCard> with SingleTickerProviderStat
                   },
                 ),
         ),
-
         // Gradient Overlay
         Positioned.fill(
           child: Container(
@@ -261,7 +262,7 @@ class _ProjectCardState extends State<ProjectCard> with SingleTickerProviderStat
               onPressed: () => _launchUrl(widget.project.githubUrl!),
               icon: Icons.code,
               label: 'GitHub',
-              isPrimary: false,
+              isPrimary: true,
               theme: theme,
             ),
           ),
@@ -290,7 +291,7 @@ class _ProjectCardState extends State<ProjectCard> with SingleTickerProviderStat
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 18),
-      label: Text(label),
+      label: Text(label, style: TextStyle(color: Colors.white)),
       style: ElevatedButton.styleFrom(
         backgroundColor: isPrimary
             ? AppColors.borderColor

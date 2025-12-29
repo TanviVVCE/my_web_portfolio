@@ -1,14 +1,11 @@
 import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
 import 'package:my_portfolio/core/utils/common_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
 import 'package:web/web.dart' as web;
 
 class Resume extends StatefulWidget {
@@ -18,149 +15,267 @@ class Resume extends StatefulWidget {
   State<Resume> createState() => _ResumeState();
 }
 
-class _ResumeState extends State<Resume> {
+class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  TabController? _tabController;
+  int _selectedTab = 0;
 
-  Future<void> _downloadResume() async {
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController!.addListener(() {
+      setState(() {
+        _selectedTab = _tabController!.index;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> downloadResume() async {
     if (kIsWeb) {
-      // Web platform - download from assets
       try {
         final byteData = await rootBundle.load('assets/resume/resume.pdf');
         final bytes = byteData.buffer.asUint8List();
-
-        // Convert Uint8List to JSUint8Array
         final jsBytes = bytes.toJS;
-
-        // Create blob using package:web
         final blob = web.Blob([jsBytes].toJS);
         final url = web.URL.createObjectURL(blob);
-
-        // Create and trigger download
         final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
         anchor.href = url;
         anchor.download = 'Tanvi_Patil_Resume.pdf';
         web.document.body?.appendChild(anchor);
         anchor.click();
         web.document.body?.removeChild(anchor);
-
-        // Clean up
         web.URL.revokeObjectURL(url);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ Resume downloaded successfully! '), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Yaay !! Resume downloaded successfully!', style: TextStyle(color: Colors.white)),
+              backgroundColor: AppColors.borderColor,
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('❌ Error downloading resume: $e'), backgroundColor: Colors.red));
+          ).showSnackBar(SnackBar(content: Text('❌ Error:  $e'), backgroundColor: Colors.red));
         }
       }
-    } else {
-      // Mobile/Desktop platform - open external URL
-      // final uri = Uri.parse(resumeDownloadUrl);
-      // if (await canLaunchUrl(uri)) {
-      //   await launchUrl(uri, mode: LaunchMode.externalApplication);
-      // } else {
-      //   if (mounted) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       const SnackBar(
-      //         content: Text('❌ Could not open resume'),
-      //         backgroundColor: Colors.red,
-      //       ),
-      //     );
-      //   }
-      // }
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  bool get isMobile => MediaQuery.of(context).size.width < 900;
 
   @override
   Widget build(BuildContext context) {
+    // Wait for TabController to be initialized
+    if (_tabController == null) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF17153B),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF17153B),
       body: SafeArea(
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 40),
-              _buildDownloadButton(),
-              const SizedBox(height: 40),
-              _buildSkillsSection(),
-              const SizedBox(height: 40),
-              _buildExperienceSection(),
-              const SizedBox(height: 40),
-              _buildEducationSection(),
-              const SizedBox(height: 40),
-            ],
-          ),
+        child: Row(
+          children: [
+            // Left Sidebar - Profile & Navigation
+            if (!isMobile) _buildDesktopSidebar(),
+
+            // Main Content Area
+            Expanded(
+              child: Column(
+                children: [
+                  // Top Navigation for Mobile
+                  if (isMobile) _buildMobileHeader(),
+
+                  // Tab Navigation
+                  _buildTabBar(),
+
+                  // Content
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController!,
+                      children: [_buildSkillsTab(), _buildExperienceTab(), _buildEducationTab()],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildDesktopSidebar() {
     return Container(
-      padding: const EdgeInsets.all(30),
+      width: 280,
       decoration: BoxDecoration(
         color: AppColors.navigationRailBgColor,
-        border: Border.all(color: AppColors.borderColor),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: WidgetCommons().boxShadowswithColors(),
+        border: Border(right: BorderSide(color: AppColors.borderColor.withOpacity(0.3))),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 40),
+
+          Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.navigationRailIconColor),
+            ),
+            child: ClipOval(child: Image.asset('assets/images/projects/Memoji.gif', fit: BoxFit.cover)),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Name
+          Text(
+            'Tanvi Virappa Patil',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.fontColor,
+              fontFamily: 'Funnel',
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Flutter & AI/ML Developer',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: AppColors.navigationRailIconColor, fontFamily: 'Funnel'),
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // Contact Links
+          _buildSidebarLink(Icons.email, 'tanvipatil843@gmail.com', 'mailto:tanvipatil843@gmail.com'),
+          _buildSidebarLink(Icons.code, 'GitHub', 'https://github.com/TanviVVCE'),
+          _buildSidebarLink(Icons.home, 'Home', ''),
+          _buildSidebarLink(Icons.message, 'Blogs', 'https://tanvis-blogs.hashnode.dev/'),
+
+          // _buildSidebarLink(Icons.link, 'Portfolio', 'https://tanvivvce.github.io/my_web_portfolio'),
+          const Spacer(),
+
+          // Download Button
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: ElevatedButton.icon(
+              onPressed: downloadResume,
+              icon: const Icon(Icons.download),
+              label: const Text('Download PDF'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.navigationRailIconColor,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSidebarLink(IconData icon, String text, String url) {
+    return InkWell(
+      onTap: () async {
+        if (text == 'Home') {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+        if (await canLaunchUrl(Uri.parse(url))) {
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.navigationRailIconColor, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(color: AppColors.fontColor, fontSize: 13, fontFamily: 'Funnel'),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.navigationRailBgColor,
+        border: Border(bottom: BorderSide(color: AppColors.borderColor.withOpacity(0.3))),
+      ),
+      child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.navigationRailIconColor, width: 2),
+                  gradient: LinearGradient(colors: [AppColors.navigationRailIconColor, AppColors.borderColor]),
+                ),
+                child: const Center(
+                  child: Text(
+                    'TP',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Tanvi Virappa Patil',
+                      'Tanvi Patil',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.fontColor,
-                        fontFamily: 'AlfaSlabOne',
+                        fontFamily: 'Funnel',
                       ),
                     ),
-                    const SizedBox(height: 8),
                     Text(
-                      'Flutter Developer | AI/ML Enthusiast',
-                      style: TextStyle(fontSize: 18, color: AppColors.navigationRailIconColor),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Icon(Icons.email, color: AppColors.navigationRailIconColor, size: 18),
-                        const SizedBox(width: 8),
-                        Text('tanvipatil843@gmail.com', style: TextStyle(color: AppColors.fontColor, fontSize: 14)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.code, color: AppColors.navigationRailIconColor, size: 18),
-                        const SizedBox(width: 8),
-                        Text('github.com/TanviVVCE', style: TextStyle(color: AppColors.fontColor, fontSize: 14)),
-                      ],
+                      'Flutter & AI/ML Developer',
+                      style: TextStyle(fontSize: 12, color: AppColors.navigationRailIconColor, fontFamily: 'Funnel'),
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                onPressed: downloadResume,
+                icon: Icon(Icons.download, color: AppColors.navigationRailIconColor),
               ),
             ],
           ),
@@ -169,174 +284,294 @@ class _ResumeState extends State<Resume> {
     );
   }
 
-  Widget _buildDownloadButton() {
-    return Center(
-      child: ElevatedButton.icon(
-        onPressed: _downloadResume,
-        icon: const Icon(Icons.download_rounded),
-        label: const Text('Download Resume PDF'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.navigationRailIconColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 5,
-        ),
+  Widget _buildTabBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.navigationRailBgColor.withOpacity(0.5),
+        border: Border(bottom: BorderSide(color: AppColors.borderColor.withOpacity(0.3))),
+      ),
+      child: TabBar(
+        controller: _tabController!,
+        labelColor: AppColors.navigationRailIconColor,
+        unselectedLabelColor: AppColors.fontColor.withOpacity(0.6),
+        indicatorColor: AppColors.navigationRailIconColor,
+        indicatorWeight: 3,
+        tabs: const [
+          Tab(icon: Icon(Icons.code), text: 'Skills'),
+          Tab(icon: Icon(Icons.work), text: 'Experience'),
+          Tab(icon: Icon(Icons.school), text: 'Education'),
+        ],
       ),
     );
   }
 
-  Widget _buildSkillsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Technical Skills'),
-        const SizedBox(height: 20),
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: [
-            _buildSkillCategory('Programming Languages', ['Dart', 'Python', 'JavaScript', 'C++'], Icons.code),
-            _buildSkillCategory('Frameworks & Tools', ['Flutter', 'Firebase', 'Docker', 'Kubernetes'], Icons.build),
-            _buildSkillCategory('State Management', ['BLoC', 'Provider', 'GetX', 'Riverpod'], Icons.settings),
-            _buildSkillCategory('AI/ML', ['TensorFlow', 'PyTorch', 'LLMs', 'GenAI'], Icons.psychology),
-          ],
-        ),
-      ],
+  Widget _buildSkillsTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 20,
+        children: [
+          _buildSkillCard('Programming Languages', Icons.code, [
+            'Dart',
+            'Python',
+            'JavaScript',
+            'C++',
+            'TypeScript',
+            'Java',
+          ], Colors.blue),
+          _buildSkillCard('Mobile Development', Icons.phone_android, [
+            'Flutter',
+            'Android',
+            'iOS',
+            'Cross-platform',
+            'macOS/Windows',
+          ], Colors.green),
+          _buildSkillCard('State Management', Icons.settings_applications, [
+            'BLoC',
+            'Provider',
+            'GetX',
+            'Riverpod',
+            'Redux',
+          ], Colors.orange),
+          _buildSkillCard('Backend & Cloud', Icons.cloud, [
+            'Firebase',
+            'Node.js',
+            'REST APIs',
+            'GraphQL',
+            'Docker',
+          ], Colors.purple),
+          _buildSkillCard('AI/ML Technologies', Icons.psychology, [
+            'TensorFlow',
+            'PyTorch',
+            'LLMs',
+            'VQVAEs',
+            'MLOps',
+            'OpenCV',
+          ], Colors.pink),
+          _buildSkillCard('DevOps & Tools', Icons.build, [
+            'Git',
+            'Docker',
+            'Kubernetes',
+            'CI/CD',
+            'AWS',
+            'Azure',
+          ], Colors.teal),
+          _buildSkillCard('Databases', Icons.storage, [
+            'MySQL',
+            'MongoDB',
+            'PostgreSQL',
+            'SQLite',
+            'Firestore',
+            'Hive',
+          ], Colors.amber),
+          _buildSkillCard('Web Technologies', Icons.web, [
+            'React',
+            'HTML/CSS',
+            'TypeScript',
+            'Responsive Design',
+          ], Colors.indigo),
+          _buildSkillCard('Corporate Technologies', Icons.web, [
+            'Confluence',
+            'Slack',
+            'Jira',
+            'Notion',
+            'n8n',
+            'Zendesk AI',
+          ], Colors.indigo),
+        ],
+      ),
     );
   }
 
-  Widget _buildSkillCategory(String title, List<String> skills, IconData icon) {
+  Widget _buildSkillCard(String title, IconData icon, List<String> skills, Color color) {
+    final cardWidth = isMobile ? double.infinity : (MediaQuery.of(context).size.width - 280 - 100) / 3;
+
     return Container(
-      width: MediaQuery.of(context).size.width < 768 ? double.infinity : (MediaQuery.of(context).size.width - 88) / 2,
+      width: isMobile ? double.infinity : cardWidth,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.navigationRailBgColor,
-        border: Border.all(color: AppColors.borderColor),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: WidgetCommons().boxShadowswithColors(),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.3)),
+        boxShadow: [BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.navigationRailIconColor, size: 24),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, color: color, size: 24),
+              ),
               const SizedBox(width: 12),
-              Text(
-                title,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.fontColor),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.fontColor,
+                    fontFamily: 'Funnel',
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Wrap(spacing: 8, runSpacing: 8, children: skills.map((skill) => _buildSkillChip(skill)).toList()),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: skills.map((skill) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: color.withOpacity(0.3)),
+                ),
+                child: Text(
+                  skill,
+                  style: TextStyle(color: AppColors.fontColor, fontSize: 12, fontWeight: FontWeight.w500),
+                ),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSkillChip(String skill) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.navigationRailIconColor.withOpacity(0.1),
-        border: Border.all(color: AppColors.navigationRailIconColor.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        skill,
-        style: TextStyle(color: AppColors.navigationRailIconColor, fontSize: 12, fontWeight: FontWeight.w600),
+  Widget _buildExperienceTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTimelineItem(
+            isFirst: true,
+            isLast: false,
+            title: 'Flutter Developer - Volunteering',
+            organization: 'G12',
+            period: 'Jan 2025 - May 2025 - Toronto',
+            description: 'Leading Flutter development team and architecting scalable mobile solutions',
+            points: [
+              'Developed a student friendly cross-platform mobile application reaching 1K+ users',
+              'Implemented clean architecture and BLoC pattern reducing bugs by 40%',
+              'Developed a cross-platform Flutter mobile application to assist students, leveraging Firebase and RESTful APIs, and optimized backend performance by 30\% through Docker-based containerization and CI/CD integration.'
+                  'Transformed Figma designs into pixel-perfect Flutter interfaces, improving accessibility and increasing user engagement by 20%.',
+              'Managed project deployments and automated workflows using GitHub and GitHub Actions, while monitoring and debugging deployment issues to ensure smooth, reliable production releases.',
+            ],
+            color: Colors.blue,
+          ),
+          _buildTimelineItem(
+            isFirst: false,
+            isLast: false,
+            title: 'Senior Flutter Developer',
+            organization: 'Brane Services Private Limited',
+            period: 'Aug 2022 - July 2024 - Bangalore',
+            description: 'Cross Platfrom Application development and architecting scalable mobile solutions',
+            points: [
+              'Built and maintained cross-platform Flutter applications with pixel-perfect UI/UX, integrating responsive layouts for both mobile and macOS dashboards.',
+              'Integrated payment gateways (Stripe, Razorpay) processing \$1K+ transactions',
+              'Optimized app performance reducing load time by 40% and crash rate by 70%',
+              'Implemented Firebase authentication, cloud functions, and real-time database',
+              'Collaborated with design team to create pixel-perfect UI/UX',
+              'Mentored 5 junior developers and conducted 50+ code reviews',
+              'Integrated AI/ML features using TensorFlow Lite for image recognition',
+              'Improved app performance by 60% through optimization techniques and state management like Bloc, Riverpod, GetX',
+              'Supported offline functionality by caching data and managing it in SharedPreferences and Hive DB',
+              'Implemented feature flags functionalities',
+              'Delivered an AI-driven facial recognition app using Firebase ML, FaceNet, and Dio, managing secure API integration, live deployment, Git version control, automated testing, and technical documentation.',
+              'Ensured secure and efficient API integration using Dio, HTTPS, and Firebase Cloud Functions, aligned with OWASP standards.',
+              'Delivered 8+ scalable Flutter apps to 1K+ users.',
+              'Published applications on Playstore and Apple Appstore',
+            ],
+            color: Colors.green,
+          ),
+          _buildTimelineItem(
+            isFirst: false,
+            isLast: true,
+            title: 'Software Development Intern',
+            organization: 'Brane Services Private Limited',
+            period: 'May 2021 - July 2022',
+            description: 'Mobile app development internship focusing on Flutter and Firebase',
+            points: [
+              'Developed UI components using Flutter and Material Design',
+              'Worked on REST API integration with proper error handling',
+              'Participated in agile development cycles and daily standups',
+              'Learned DevOps basics with Docker and CI/CD pipelines',
+              'Contributed to internal documentation and code standards via confluence and Jira',
+              'Implemented new Flutter features and resolved bugs, ensuring efficient UX and secure API integration. Developed robust backend logic with OOP, multithreading, collections, and exception handling.',
+              'Developed interactive, data-driven UI components aligned with business requirements and Figma designs.',
+              'Built Django APIs and integrated with frontend via Dio and HTTPS, improving performance by 15%.',
+              'Built a warehouse management app with Firebase Crashlytics, improving debugging efficiency by 40\% and strengthening app stability.',
+            ],
+            color: Colors.orange,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildExperienceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Work Experience'),
-        const SizedBox(height: 20),
-        _buildTimelineItem(
-          isFirst: true,
-          isLast: false,
-          title: 'Senior Flutter Developer',
-          organization: 'Tech Company XYZ',
-          period: 'Jan 2023 - Present',
-          description: 'Leading Flutter development team',
-          points: [
-            'Developed 10+ cross-platform mobile applications',
-            'Implemented clean architecture and BLoC pattern',
-            'Mentored junior developers and conducted code reviews',
-            'Integrated AI/ML features using TensorFlow Lite',
-          ],
-        ),
-        _buildTimelineItem(
-          isFirst: false,
-          isLast: false,
-          title: 'Flutter Developer',
-          organization: 'StartUp ABC',
-          period: 'Jun 2021 - Dec 2022',
-          description: 'Full-stack mobile development',
-          points: [
-            'Built e-commerce mobile app with 50K+ downloads',
-            'Integrated payment gateways (Stripe, Razorpay)',
-            'Optimized app performance reducing load time by 40%',
-            'Implemented Firebase authentication and cloud functions',
-          ],
-        ),
-        _buildTimelineItem(
-          isFirst: false,
-          isLast: true,
-          title: 'Software Development Intern',
-          organization: 'Company DEF',
-          period: 'Jan 2021 - May 2021',
-          description: 'Mobile app development internship',
-          points: [
-            'Developed UI components using Flutter',
-            'Worked on REST API integration',
-            'Participated in agile development cycles',
-            'Learned DevOps basics with Docker',
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEducationSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Education'),
-        const SizedBox(height: 20),
-        _buildTimelineItem(
-          isFirst: true,
-          isLast: false,
-          title: 'Bachelor of Engineering in Computer Science',
-          organization: 'Visvesvaraya Technological University',
-          period: '2018 - 2022',
-          description: 'CGPA: 8.5/10',
-          points: [
-            'Specialized in Software Engineering and AI/ML',
-            'Final year project: AI-powered mobile application',
-            'Active member of coding club',
-            'Won 2nd place in state-level hackathon',
-          ],
-        ),
-        _buildTimelineItem(
-          isFirst: false,
-          isLast: true,
-          title: 'Pre-University Course (PUC)',
-          organization: 'ABC College',
-          period: '2016 - 2018',
-          description: 'Percentage: 92%',
-          points: [
-            'Science stream with Computer Science',
-            'Developed interest in programming',
-            'School topper in Computer Science',
-          ],
-        ),
-      ],
+  Widget _buildEducationTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTimelineItem(
+            isFirst: true,
+            isLast: false,
+            title: 'Masters in Electrical and Computer Engineering',
+            organization: 'University of Toronto',
+            period: '2024 - 2026',
+            description: 'Specialization in Artificial Intelligence and Computer Engineering',
+            points: [
+              'MPAC Student Wing - Student Ambassador, University of Toronto - Collaborated with the MEng Graduate Office to enhance the overall experience for engineering students ',
+              'Led and conducted several professional development initiatives to support student growth beyond academics ',
+              'Tech2U Classroom Ambassador - Supported 600+ instructors with classroom technology, ensuring seamless teaching experiences and Deployed Whisper AI-based auto-captioning system aligned with professor feedback for improved accuracy ',
+              'Published research paper on "Mitigating Quantum Attacks from V2G with Blockchain and Vehicular Trust"',
+              'Research under Prof. Kundur – Post Quantum Cryptography to secure Blockchains and scale them using Cloud Computing',
+              'Courses - Introduction to Generative AI, Introduction to Machine Learning, Introduction to Deep Learning, Introduction to Cloud Computing, Parallel Programming, Masters of Engineeing Project, Blockchains and Cryptocurrencies',
+            ],
+            color: AppColors.navigationRailIconColor,
+          ),
+          _buildTimelineItem(
+            isFirst: false,
+            isLast: false,
+            title: 'Bachelor of Engineering in Computer Science',
+            organization: 'Visvesvaraya Technological University',
+            period: '2018 - 2022',
+            description: 'CGPA: 9.16/10 - First Class with Distinction',
+            points: [
+              'Specialized in Software Engineering, AI/ML, and Mobile App Development',
+              'Final year project: AI-powered mobile application for healthcare',
+              'Published research paper on "An innovative medical system to predict mortality rates in Hospitals using Machine Learning and Artificial Intelligence "',
+              'Teaching Assistant for Data Structures and Algorithms course',
+              'Led "Code Bar camps" and "Hacktoberfests" arrangements',
+            ],
+            color: Colors.purple,
+          ),
+          // _buildTimelineItem(
+          //   isFirst: false,
+          //   isLast: true,
+          //   title: 'Pre-University Course (PUC)',
+          //   organization: 'ABC College',
+          //   period: '2016 - 2018',
+          //   description: 'Percentage: 92% - Science Stream (Physics, Chemistry, Mathematics, Computer Science)',
+          //   points: [
+          //     'School topper in Computer Science with 98%',
+          //     'Developed interest in programming through C++ and Python',
+          //     'Participated in National Science Olympiad',
+          //     'Led school tech club and organized coding workshops',
+          //   ],
+          //   color: Colors.teal,
+          // ),
+        ],
+      ),
     );
   }
 
@@ -348,80 +583,99 @@ class _ResumeState extends State<Resume> {
     required String period,
     required String description,
     required List<String> points,
+    required Color color,
   }) {
     return TimelineTile(
       isFirst: isFirst,
       isLast: isLast,
-      beforeLineStyle: LineStyle(color: AppColors.navigationRailIconColor, thickness: 2),
+      beforeLineStyle: LineStyle(color: color.withOpacity(0.3), thickness: 2),
       indicatorStyle: IndicatorStyle(
-        width: 40,
-        height: 40,
+        width: 50,
+        height: 50,
         indicator: Container(
           decoration: BoxDecoration(
-            color: AppColors.navigationRailIconColor,
+            color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.borderColor, width: 3),
+            boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 2))],
           ),
-          child: const Icon(Icons.check, color: Colors.white, size: 20),
+          child: const Icon(Icons.star, color: Colors.white, size: 24),
         ),
       ),
       endChild: Container(
-        margin: const EdgeInsets.only(left: 20, bottom: 30),
-        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(left: 24, bottom: 32),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: AppColors.navigationRailBgColor,
-          border: Border.all(color: AppColors.borderColor),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: WidgetCommons().boxShadowswithColors(),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3)),
+          boxShadow: [BoxShadow(color: color.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.fontColor),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.fontColor,
+                fontFamily: 'Funnel',
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                // Icon(Icons.business, color: color, size: 18),
+                // const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    organization,
+                    style: TextStyle(fontSize: 20, color: color, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.business, color: AppColors.navigationRailIconColor, size: 16),
+                Icon(Icons.calendar_today, color: AppColors.fontColor.withOpacity(0.6), size: 16),
                 const SizedBox(width: 8),
-                Text(
-                  organization,
-                  style: TextStyle(fontSize: 14, color: AppColors.navigationRailIconColor, fontWeight: FontWeight.w600),
+                Text(period, style: TextStyle(fontSize: 14, color: AppColors.fontColor.withOpacity(0.7))),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+              child: Text(
+                description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.fontColor,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.calendar_today, color: AppColors.fontColor.withOpacity(0.6), size: 14),
-                const SizedBox(width: 8),
-                Text(period, style: TextStyle(fontSize: 13, color: AppColors.fontColor.withOpacity(0.7))),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              description,
-              style: TextStyle(fontSize: 14, color: AppColors.fontColor.withOpacity(0.8), fontStyle: FontStyle.italic),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             ...points.map(
               (point) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '• ',
-                      style: TextStyle(
-                        color: AppColors.navigationRailIconColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                     ),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(point, style: TextStyle(color: AppColors.fontColor, fontSize: 14, height: 1.5)),
+                      child: Text(
+                        point,
+                        style: TextStyle(color: AppColors.fontColor.withOpacity(0.9), fontSize: 14, height: 1.5),
+                      ),
                     ),
                   ],
                 ),
@@ -430,28 +684,6 @@ class _ResumeState extends State<Resume> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 32,
-          decoration: BoxDecoration(color: AppColors.navigationRailIconColor, borderRadius: BorderRadius.circular(2)),
-        ),
-        const SizedBox(width: 16),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppColors.fontColor,
-            fontFamily: 'AlfaSlabOne',
-          ),
-        ),
-      ],
     );
   }
 }

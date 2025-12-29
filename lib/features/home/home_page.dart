@@ -1,10 +1,15 @@
+import 'dart:js_interop';
+
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:my_portfolio/core/constants/app_colors.dart';
 import 'package:my_portfolio/core/utils/common_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:my_portfolio/widgets/quick_action_menu/quick_action_menu.dart';
+import 'package:web/web.dart' as web;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,403 +18,726 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
+  AnimationController? _floatingController;
+  AnimationController? _fadeController;
+  Animation<double>? _floatingAnimation;
+  Animation<double>? _fadeAnimation;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Floating animation for decorative elements
+    _floatingController = AnimationController(duration: const Duration(seconds: 3), vsync: this)..repeat(reverse: true);
+
+    _floatingAnimation = Tween<double>(
+      begin: -10,
+      end: 10,
+    ).animate(CurvedAnimation(parent: _floatingController!, curve: Curves.easeInOut));
+
+    // Fade in animation
+    _fadeController = AnimationController(duration: const Duration(milliseconds: 1500), vsync: this);
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController!, curve: Curves.easeIn));
+
+    _fadeController!.forward();
+    _isInitialized = true;
+
+    // Force rebuild after initialization
+    setState(() {});
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _floatingController?.dispose();
+    _fadeController?.dispose();
     super.dispose();
-  }
-
-  void _launchURL(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  void _scrollToTop() {
-    _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
   void _navigateToHome() {
     Navigator.pushReplacementNamed(context, '/home');
   }
 
+  bool get isMobile => MediaQuery.of(context).size.width < 900;
+  bool get isTablet => MediaQuery.of(context).size.width >= 900 && MediaQuery.of(context).size.width < 1200;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFF17153B),
-      body: QuickActionMenu(
-        onTap: _navigateToHome,
-        icon: Icons.menu,
-        backgroundColor: AppColors.navigationRailIconColor,
-        actions: WidgetCommons().getQuickActions(context),
-        child: SafeArea(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [columnAnimated(), cardBuilder(context)],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 78.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 500),
-                          _buildSocialButton(
-                            svgPath: 'assets/logos/linkedin.svg',
-                            url: 'https://www.linkedin.com/in/tanvi-virappa-patil-044796197/',
-                          ),
-                          const SizedBox(height: 20),
-                          _buildSocialButton(svgPath: 'assets/logos/github.svg', url: 'https://github.com/TanviVVCE'),
-                          const SizedBox(height: 20),
-                          _buildSocialButton(svgPath: 'assets/logos/google.svg', url: 'mailto:tanvipatil843@gmail.com'),
-                          const SizedBox(height: 55),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                //       child: Row(
-                //         children: [
-                //           Column(
-                //             crossAxisAlignment: CrossAxisAlignment.start,
-                //             mainAxisAlignment: MainAxisAlignment.start,
-                //             children: [columnAnimated(), cardBuilder(context)],
-                //           ),
-                //           Column(
-                //             crossAxisAlignment: CrossAxisAlignment.end,
-                //             mainAxisAlignment: MainAxisAlignment.center,
-                //             children: [
-                //               Padding(
-                //                 padding: const EdgeInsets.only(left: 78.0, top: 610),
-                //                 child: Container(
-                //                   height: 60,
-                //                   width: 60,
-                //                   decoration: const BoxDecoration(
-                //                     color: AppColors.navigationRailIconColor,
-                //                     shape: BoxShape.circle,
-                //                   ),
-                //                   child: IconButton(
-                //                     onPressed: () async {
-                //                       final url = 'https://www.linkedin.com/in/tanvi-virappa-patil-044796197/';
-                //                       if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
-                //                         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                //                       }
-                //                     },
-                //                     icon: SvgPicture.asset(
-                //                       'assets/logos/linkedin.svg',
-                //                       width: 30,
-                //                       height: 30,
-                //                       colorFilter: ColorFilter.mode(
-                //                         Colors.white, // Colorize SVGs to match theme
-                //                         BlendMode.srcIn,
-                //                       ),
-                //                     ),
-                //                     color: Colors.white,
-                //                   ),
-                //                 ),
-                //               ),
-                //               Padding(
-                //                 padding: const EdgeInsets.only(left: 78.0, top: 50),
-                //                 child: Container(
-                //                   height: 60,
-                //                   width: 60,
-                //                   decoration: const BoxDecoration(
-                //                     color: AppColors.navigationRailIconColor,
-                //                     shape: BoxShape.circle,
-                //                   ),
-                //                   child: IconButton(
-                //                     onPressed: () async {
-                //                       final url = 'https://www.linkedin.com/in/tanvi-virappa-patil-044796197/';
-                //                       if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
-                //                         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                //                       }
-                //                     },
-                //                     icon: SvgPicture.asset(
-                //                       'assets/logos/linkedin.svg',
-                //                       width: 30,
-                //                       height: 30,
-                //                       colorFilter: ColorFilter.mode(
-                //                         Colors.white, // Colorize SVGs to match theme
-                //                         BlendMode.srcIn,
-                //                       ),
-                //                     ),
-                //                     color: Colors.white,
-                //                   ),
-                //                 ),
-                //               ),
-                //             ],
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ],
-                // ),
-              ),
-            ],
-          ),
+    // Wait for animations to initialize
+    if (!_isInitialized || _floatingAnimation == null || _fadeAnimation == null) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF17153B),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-          // body: Center(child: Text('Content')),
+    return Scaffold(
+      backgroundColor: const Color(0xFF17153B),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Animated background elements
+            _buildBackgroundDecorations(),
+
+            // Main content
+            SingleChildScrollView(
+              controller: _scrollController,
+              child: FadeTransition(
+                opacity: _fadeAnimation!,
+                child: isMobile ? _buildMobileLayout() : _buildDesktopLayout(),
+              ),
+            ),
+
+            // Floating social buttons
+            if (!isMobile) _buildFloatingSocialButtons(),
+          ],
         ),
       ),
     );
   }
 
-  Widget columnAnimated() {
+  Widget _buildBackgroundDecorations() {
+    return Stack(
+      children: [
+        // Gradient circles
+        Positioned(
+          top: -100,
+          right: -100,
+          child: AnimatedBuilder(
+            animation: _floatingAnimation!,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(_floatingAnimation!.value, _floatingAnimation!.value),
+                child: Container(
+                  width: 400,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [AppColors.navigationRailIconColor.withOpacity(0.1), Colors.transparent],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        Positioned(
+          bottom: -150,
+          left: -150,
+          child: AnimatedBuilder(
+            animation: _floatingAnimation!,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(-_floatingAnimation!.value, -_floatingAnimation!.value),
+                child: Container(
+                  width: 500,
+                  height: 500,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(colors: [AppColors.borderColor.withOpacity(0.08), Colors.transparent]),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout() {
     return Padding(
-      padding: const EdgeInsets.only(top: 40, left: 35, right: 19),
-      child: AnimatedTextKit(
-        repeatForever: true,
-        animatedTexts: [
-          animatedTextContent('Hello World !! I am a Software Developer 💻'),
-          animatedTextContent('Hello World !! I am a Flutter Developer 📱'),
-          animatedTextContent('Hello World !! I am a Blogger ✉️'),
-          animatedTextContent('Hello World !! I am a GenAI Enthusiast 🤖'),
-          animatedTextContent('Hello World !! I am trying to learn MLOps 🚢'),
+      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 40),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left column - Hero section
+          Expanded(
+            flex: 5,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeroSection(),
+                const SizedBox(height: 40),
+                _buildQuickStats(),
+                const SizedBox(height: 40),
+                _buildAboutSection(),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 40),
+
+          // Right column - Skills & highlights
+          Expanded(
+            flex: 3,
+            child: Column(
+              children: [
+                // _buildSkillsHighlight(),
+                const SizedBox(height: 30),
+                _buildCurrentFocus(),
+                const SizedBox(height: 30),
+                _buildCTAButtons(),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget cardBuilder(BuildContext context) {
+  Widget _buildMobileLayout() {
     return Padding(
-      padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 40, top: 40, right: 20, bottom: 20),
-      child: Container(
-        constraints: BoxConstraints(maxWidth: 1300, minWidth: 300, maxHeight: 800),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.borderColor),
-          boxShadow: WidgetCommons().boxShadowswithColors(),
-          color: AppColors.navigationRailBgColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeroSection(),
+          const SizedBox(height: 30),
+          _buildQuickStats(),
+          const SizedBox(height: 30),
+          // _buildSkillsHighlight(),
+          const SizedBox(height: 30),
+          _buildAboutSection(),
+          const SizedBox(height: 30),
+          _buildCurrentFocus(),
+          const SizedBox(height: 30),
+          _buildCTAButtons(),
+          const SizedBox(height: 30),
+          _buildMobileSocialButtons(),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Animated greeting
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.navigationRailIconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.navigationRailIconColor.withOpacity(0.3)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0, top: 10.0),
-                child: Text(
-                  '👋 About Me',
-                  style: TextStyle(fontSize: 20, color: AppColors.fontColor, fontFamily: 'AlfaSlabOne'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, left: 25.0),
-                child: Container(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: AppColors.borderColor),
-                  width: 100,
-                  height: 3,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: RichText(
-                  textAlign: TextAlign.justify,
-                  text: TextSpan(
-                    style: TextStyle(color: AppColors.fontColor, fontSize: WidgetCommons().responsiveFontSize(context)),
-                    children: [
-                      const TextSpan(
-                        text:
-                            'I\'m a passionate and results-driven software developer who combines startup speed and innovation with ',
-                      ),
-                      TextSpan(
-                        text: 'enterprise-level engineering discipline',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.navigationRailIconColor,
-                          decoration: TextDecoration.underline,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      const TextSpan(
-                        text:
-                            '.\nI specialize in building scalable, high-performance cross-platform applications using ',
-                      ),
-                      TextSpan(
-                        text: 'Flutter',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.navigationRailIconColor,
-                          decoration: TextDecoration.underline,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      const TextSpan(
-                        text:
-                            ', delivering consistent and polished experiences across Android, iOS, Web \nWindows, and macOS from a single, maintainable codebase.   My expertise spans building \n \n ',
-                      ),
-                      TextSpan(
-                        text: '🚀 Reusable widget systems \n',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.navigationRailIconColor,
-                          decoration: TextDecoration.underline,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      TextSpan(
-                        text: '🚀 Robust state management architectures using ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: 'Providers, Bloc, GetX, RiverPod ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.navigationRailIconColor,
-                          decoration: TextDecoration.underline,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            ' that support rapid iteration while remaining clean, testable, and production-ready.  \n \n ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: 'Track record of delivering end-to-end solutions, including :   \n',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.navigationRailIconColor,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      TextSpan(
-                        text: '🚀 REST API integrations \n',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: '🚀 Third-party SDKs \n',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: '🚀 Performance optimization \n',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: '🚀 Advanced debugging to ensure reliability at scale.   \n',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: '🚀 Docker and Kubernetes deployments \n \n',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: 'Beyond application development, I am deeply engaged in ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: 'Artificial Intelligence and Generative AI ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.navigationRailIconColor,
-                          decoration: TextDecoration.underline,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            ', with hands-on experience in:\n 🌟 Building reasoning-based models \n 🌟 Fine-tuning Large Language Models (LLMs) \n 🌟 Developing and integrating image generation systems.\n 🌟 Designing AI-driven features with a strong emphasis on scalability, efficiency, and real-world deployment.  \n \n ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: 'Post-Quantum Cryptography ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                          color: AppColors.navigationRailIconColor,
-                          decoration: TextDecoration.underline,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            ' as a side research initiative, focusing on building systems resilient to future quantum-era security threats. \n \n ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text:
-                            'I thrive in agile, cross-functional teams, value clear communication and ownership, and enjoy collaborating with designers, product managers, and engineers to transform ideas into impactful products. \nI continuously stay current with emerging technologies, tools, and best practices to deliver solutions that are not only innovative but also future-ready.  \n \n ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text:
-                            '🚀 If you\'re looking for a developer who can move fast, think strategically, and deliver robust solutions with powerful AI and GenAI integrations, ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                      TextSpan(
-                        text: 'I\'d love to collaborate and help bring your vision to life.',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.navigationRailIconColor,
-                          fontSize: WidgetCommons().responsiveFontSize(context),
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            ' \n \n 😁 I\'m always open to meaningful discussions, so don\'t hesitate to reach out!   Being part of the developer community, I\'m happy to connect, share insights, and help solve problems together.   \n \n I am still learning about DevOps and MLOps and enthusiastic to learn more.   🛳 ',
-                        style: TextStyle(fontSize: WidgetCommons().responsiveFontSize(context)),
-                      ),
-                    ],
-                  ),
+              Text('👋', style: TextStyle(fontSize: isMobile ? 20 : 24)),
+              const SizedBox(width: 8),
+              Text(
+                'Hello, I\'m',
+                style: TextStyle(
+                  color: AppColors.navigationRailIconColor,
+                  fontSize: isMobile ? 14 : 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
+
+        const SizedBox(height: 20),
+
+        // Name
+        Text(
+          'Tanvi Virappa Patil',
+          style: TextStyle(
+            fontSize: isMobile ? 36 : 56,
+            fontWeight: FontWeight.bold,
+            color: AppColors.fontColor,
+            fontFamily: 'AlfaSlabOne',
+            height: 1.2,
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Animated roles
+        SizedBox(
+          height: isMobile ? 80 : 100,
+          child: AnimatedTextKit(
+            repeatForever: true,
+            pause: const Duration(milliseconds: 1000),
+            animatedTexts: [
+              _buildAnimatedRole('Flutter Developer 📱', Colors.blue),
+              _buildAnimatedRole('Software Engineer 💻', Colors.green),
+              _buildAnimatedRole('GenAI Enthusiast 🤖', Colors.purple),
+              _buildAnimatedRole('Tech Blogger ✍️', Colors.orange),
+              _buildAnimatedRole('MLOps Learner 🚢', Colors.teal),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 30),
+
+        // Tagline
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.navigationRailIconColor.withOpacity(0.1), AppColors.borderColor.withOpacity(0.1)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderColor.withOpacity(0.3)),
+          ),
+          child: Text(
+            '🚀 Building scalable, high-performance cross-platform applications using enterprise-grade engineering practices, with real-world AI/ML and Generative AI integrations that drive measurable business impact.',
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 18,
+              color: AppColors.fontColor.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
+              height: 1.5,
+              fontFamily: 'Funnel',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  TypewriterAnimatedText _buildAnimatedRole(String text, Color color) {
+    return TypewriterAnimatedText(
+      text,
+      speed: const Duration(milliseconds: 100),
+      textStyle: TextStyle(
+        fontSize: isMobile ? 24 : 40,
+        fontWeight: FontWeight.bold,
+        color: color,
+        fontFamily: 'AlfaSlabOne',
       ),
     );
   }
 
-  AnimatedText animatedTextContent(String contentData) {
-    return TypewriterAnimatedText(
-      contentData,
-      speed: const Duration(milliseconds: 100),
-      textStyle: TextStyle(
-        fontSize: MediaQuery.of(context).size.width < 600 ? 16 : 35,
-        fontFamily: 'AlfaSlabOne',
-        color: AppColors.fontColor,
+  Widget _buildQuickStats() {
+    final stats = [
+      {'icon': '🎯', 'label': 'Projects', 'value': '20+'},
+      {'icon': '💼', 'label': 'Experience', 'value': '3+ Years'},
+      {'icon': '🏆', 'label': 'Achievements', 'value': '10+'},
+      {'icon': '⭐', 'label': 'Skills', 'value': '20+'},
+      {'icon': '📱', 'label': 'Apps', 'value': '5+'},
+    ];
+
+    return Wrap(
+      spacing: 9,
+      runSpacing: 9,
+      children: stats.map((stat) {
+        return Container(
+          width: isMobile ? (MediaQuery.of(context).size.width - 56) / 2 : 160,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.navigationRailBgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderColor.withOpacity(0.3)),
+            boxShadow: WidgetCommons().boxShadowswithColors(),
+          ),
+          child: Column(
+            children: [
+              Text(stat['icon']!, style: const TextStyle(fontSize: 32)),
+              const SizedBox(height: 8),
+              Text(
+                stat['value']!,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.navigationRailIconColor),
+              ),
+              const SizedBox(height: 4),
+              Text(stat['label']!, style: TextStyle(fontSize: 12, color: AppColors.fontColor.withOpacity(0.7))),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSkillsHighlight() {
+    // final skills = [
+    //   {'name': 'Flutter', 'level': 0.95, 'color': Colors.blue},
+    //   {'name': 'AI/ML', 'level': 0.85, 'color': Colors.purple},
+    //   {'name': 'GenAI', 'level': 0.80, 'color': Colors.pink},
+    //   {'name': 'DevOps', 'level': 0.75, 'color': Colors.orange},
+    // ];
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.navigationRailBgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderColor),
+        boxShadow: WidgetCommons().boxShadowswithColors(),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.navigationRailIconColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.star, color: AppColors.navigationRailIconColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              // Text(
+              //   'Core Expertise',
+              //   style: TextStyle(
+              //     fontSize: 20,
+              //     fontWeight: FontWeight.bold,
+              //     color: AppColors.fontColor,
+              //     fontFamily: 'AlfaSlabOne',
+              //   ),
+              // ),
+            ],
+          ),
+          // const SizedBox(height: 20),
+          // ...skills.map((skill) {
+          //   return Padding(
+          //     padding: const EdgeInsets.only(bottom: 16),
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Row(
+          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //           children: [
+          //             Text(
+          //               skill['name'] as String,
+          //               style: TextStyle(color: AppColors.fontColor, fontSize: 14, fontWeight: FontWeight.w600),
+          //             ),
+          //             Text(
+          //               '${((skill['level'] as double) * 100).toInt()}%',
+          //               style: TextStyle(color: skill['color'] as Color, fontSize: 12, fontWeight: FontWeight.bold),
+          //             ),
+          //           ],
+          //         ),
+          //         const SizedBox(height: 8),
+          //         ClipRRect(
+          //           borderRadius: BorderRadius.circular(10),
+          //           child: TweenAnimationBuilder<double>(
+          //             duration: const Duration(milliseconds: 1500),
+          //             curve: Curves.easeOut,
+          //             tween: Tween<double>(begin: 0, end: skill['level'] as double),
+          //             builder: (context, value, child) {
+          //               return LinearProgressIndicator(
+          //                 value: value,
+          //                 backgroundColor: AppColors.borderColor.withOpacity(0.2),
+          //                 valueColor: AlwaysStoppedAnimation<Color>(skill['color'] as Color),
+          //                 minHeight: 8,
+          //               );
+          //             },
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   );
+          // }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrentFocus() {
+    final focuses = [
+      {'icon': '🚀', 'title': 'GenAI Integration', 'desc': 'Building AI-powered features'},
+      {'icon': '🛳️', 'title': 'MLOps', 'desc': 'Learning deployment pipelines'},
+      {'icon': '🔐', 'title': 'Post-Quantum Cryptography and Blockchains', 'desc': 'Research initiative'},
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.navigationRailIconColor.withOpacity(0.1), AppColors.borderColor.withOpacity(0.1)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.navigationRailIconColor.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '🎯 Current Focus',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.fontColor,
+              fontFamily: 'AlfaSlabOne',
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...focuses.map((focus) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Text(focus['icon']!, style: const TextStyle(fontSize: 24)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          focus['title']!,
+                          style: TextStyle(color: AppColors.fontColor, fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          focus['desc']!,
+                          style: TextStyle(color: AppColors.fontColor.withOpacity(0.6), fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppColors.navigationRailBgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.borderColor),
+        boxShadow: WidgetCommons().boxShadowswithColors(),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.navigationRailIconColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                'About Me',
+                style: TextStyle(
+                  fontSize: isMobile ? 24 : 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.fontColor,
+                  fontFamily: 'AlfaSlabOne',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildAboutParagraph(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutParagraph() {
+    return RichText(
+      textAlign: TextAlign.justify,
+      text: TextSpan(
+        style: TextStyle(color: AppColors.fontColor, fontSize: isMobile ? 14 : 16, height: 1.8),
+        children: [
+          const TextSpan(text: 'I’m a results-driven '),
+          TextSpan(
+            text: 'software developer',
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.navigationRailIconColor),
+          ),
+          const TextSpan(text: ' who combines startup agility with enterprise-grade engineering.\n\n'),
+          const TextSpan(text: 'I specialize in building '),
+          TextSpan(
+            text:
+                'scalable, high-performance cross-platform applications with Flutter and deploying AI/ML/GenAI Solutions',
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.navigationRailIconColor),
+          ),
+          const TextSpan(text: ', delivering consistent experiences across Android, iOS, Web, Windows, and macOS.\n\n'),
+          const TextSpan(
+            text: '💡 My expertise includes:\n',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const TextSpan(text: '• Scalable and clean architecture with BLoC, Provider, GetX, Riverpod\n'),
+          const TextSpan(text: '• REST API integrations & third-party SDKs\n'),
+          const TextSpan(text: '• Performance optimization & debugging\n'),
+          const TextSpan(text: '• Docker & Kubernetes deployments\n'),
+          const TextSpan(text: '• AI/ML integration with TensorFlow & PyTorch\n\n'),
+          const TextSpan(text: 'Beyond development, I\'m deeply engaged in '),
+          TextSpan(
+            text: 'Generative AI',
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.navigationRailIconColor),
+          ),
+          const TextSpan(
+            text:
+                ', fine-tuning LLMs, and building AI-driven features with real-world deployment focus including Image Generation.\n\n',
+          ),
+          TextSpan(
+            text:
+                'Curious by nature, I\’m continuously learning and keep myself tech updated to build future-ready solutions. \n',
+          ),
+          const TextSpan(text: '🚀 '),
+          TextSpan(
+            text: 'Let\'s collaborate and build something amazing together ! ',
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.navigationRailIconColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCTAButtons() {
+    return Column(
+      children: [
+        ElevatedButton.icon(
+          onPressed: () => Navigator.pushNamed(context, '/projects'),
+          icon: const Icon(Icons.rocket_launch),
+          label: const Text('View My Projects'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.navigationRailIconColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            minimumSize: Size(isMobile ? double.infinity : 250, 56),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 5,
+          ),
+        ),
+        // const SizedBox(height: 16),
+        // OutlinedButton.icon(
+        //   onPressed: () => downloadResume,
+        //   icon: const Icon(Icons.download),
+        //   label: const Text('Download Resume'),
+        //   style: OutlinedButton.styleFrom(
+        //     foregroundColor: AppColors.navigationRailIconColor,
+        //     side: BorderSide(color: AppColors.navigationRailIconColor, width: 2),
+        //     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+        //     minimumSize: Size(isMobile ? double.infinity : 250, 56),
+        //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        //   ),
+        // ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () async {
+            String url = 'https://tanvis-blogs.hashnode.dev';
+            if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
+              await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+            }
+          },
+          icon: const Icon(Icons.message),
+          label: const Text('Blogs'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.navigationRailIconColor,
+            side: BorderSide(color: AppColors.navigationRailIconColor, width: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            minimumSize: Size(isMobile ? double.infinity : 250, 56),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton.icon(
+          onPressed: () => Navigator.pushNamed(context, '/resume'),
+          icon: const Icon(Icons.rocket_launch),
+          label: const Text('View My Journey'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.navigationRailIconColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+            minimumSize: Size(isMobile ? double.infinity : 250, 56),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFloatingSocialButtons() {
+    return Positioned(
+      right: 40,
+      bottom: 40,
+      child: Column(
+        children: [
+          _buildSocialButton(
+            svgPath: 'assets/logos/linkedin.svg',
+            url: 'https://www.linkedin.com/in/tanvi-virappa-patil-044796197/',
+          ),
+          const SizedBox(height: 16),
+          _buildSocialButton(svgPath: 'assets/logos/github.svg', url: 'https://github.com/TanviVVCE'),
+          const SizedBox(height: 16),
+          _buildSocialButton(svgPath: 'assets/logos/google.svg', url: 'mailto:tanvipatil843@gmail.com'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileSocialButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildSocialButton(
+          svgPath: 'assets/logos/linkedin.svg',
+          url: 'https://www.linkedin.com/in/tanvi-virappa-patil-044796197/',
+        ),
+        const SizedBox(width: 16),
+        _buildSocialButton(svgPath: 'assets/logos/github.svg', url: 'https://github.com/TanviVVCE'),
+        const SizedBox(width: 16),
+        _buildSocialButton(svgPath: 'assets/logos/google.svg', url: 'mailto:tanvipatil843@gmail.com'),
+      ],
     );
   }
 
   Widget _buildSocialButton({required String svgPath, required String url}) {
-    return Container(
-      height: 60,
-      width: 60,
-      decoration: const BoxDecoration(
-        color: AppColors.navigationRailIconColor,
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4))],
-      ),
-      child: IconButton(
-        onPressed: () async {
-          if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
-            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-          }
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: AnimatedBuilder(
+        animation: _floatingAnimation!,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _floatingAnimation!.value / 2),
+            child: Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                color: AppColors.navigationRailIconColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.navigationRailIconColor.withOpacity(0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                onPressed: () async {
+                  if (url.isNotEmpty && await canLaunchUrl(Uri.parse(url))) {
+                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                  }
+                },
+                icon: SvgPicture.asset(
+                  svgPath,
+                  width: 28,
+                  height: 28,
+                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                ),
+              ),
+            ),
+          );
         },
-        icon: SvgPicture.asset(
-          svgPath,
-          width: 30,
-          height: 30,
-          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-        ),
       ),
     );
   }
