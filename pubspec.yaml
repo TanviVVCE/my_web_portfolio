@@ -32,6 +32,18 @@ flutter:
     - assets/logos/linkedin.svg
     - assets/logos/blog.svg
     - assets/resume/resume.pdf
+    - assets/images/projects/portfolio.png
+    - assets/images/projects/resume.png
+    - assets/images/projects/G12.jpg
+    - assets/images/projects/TTS.png
+    - assets/images/projects/GPU.jpeg
+    - assets/images/projects/crypto.jpg
+    - assets/images/projects/PQC.jpg
+    - assets/images/projects/telcel.jpg
+    - assets/images/projects/Brane.png
+    - assets/images/projects/SDI-WMS.png
+    - assets/images/projects/Memoji.gif
+    - assets/images/projects/woofwhere.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
