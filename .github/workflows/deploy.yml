@@ -1,0 +1,55 @@
+name: Deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main 
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the repository
+      - name:  Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'  
+          channel: 'stable'
+          cache: true
+
+      # Step 3: Verify Flutter installation
+      - name: Verify Flutter
+        run: |
+          flutter --version
+          flutter doctor -v
+
+      # Step 4: Get dependencies
+      - name: Get Dependencies
+        run: flutter pub get
+
+      # Step 5: Build web app
+      - name: Build Web App
+        run: flutter build web --release --base-href /my_web_portfolio/
+
+      # Step 6: Add . nojekyll file (prevents Jekyll processing)
+      - name: Add . nojekyll file
+        run: touch build/web/. nojekyll
+
+      # Step 7: Deploy to GitHub Pages
+      - name:  Deploy to GitHub Pages
+        uses:  peaceiris/actions-gh-pages@v3
+        with: 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
