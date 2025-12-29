@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "af7f7780fe8461317d1a3c9622590fa5",
+const RESOURCES = {"flutter_bootstrap.js": "7452318e71486c1febf6547c446c2a43",
 "version.json": "9b818ca9511483c901bed1545384376c",
 "index.html": "944cafd6079d88f186aa1f729ee33a96",
 "/": "944cafd6079d88f186aa1f729ee33a96",
@@ -36,7 +36,7 @@ const RESOURCES = {"flutter_bootstrap.js": "af7f7780fe8461317d1a3c9622590fa5",
 "assets/assets/images/projects/G12.jpg": "74cbd46121d9253ac84c9513ef69aded",
 "assets/assets/images/projects/PQC.jpg": "4a919a08e8f7b3a65628a100c6b06011",
 "assets/assets/images/projects/Brane.png": "5bb35d120d21b4c77c5094b19f0488d6",
-"assets/assets/resume/resume.pdf": "4f25eccfb977581956934110f11610ff",
+"assets/assets/resume/resume.pdf": "f2ae7230148f594a8b383c3ff3d59b78",
 "assets/assets/logos/github.svg": "86a06412a2ae8f9ae304d60a95aa6454",
 "assets/assets/logos/google.svg": "bf0346ad5fa18a11b27e808aef507fd9",
 "assets/assets/logos/linkedin.svg": "15cf9ebef4a8ddc72756fd6d8d2be471",
