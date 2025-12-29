@@ -606,7 +606,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ElevatedButton.icon(
           onPressed: () => Navigator.pushNamed(context, '/projects'),
           icon: const Icon(Icons.rocket_launch),
-          label: const Text('View My Projects'),
+          label: const Text('View My Projects', style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.navigationRailIconColor,
             foregroundColor: Colors.white,
@@ -651,7 +651,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ElevatedButton.icon(
           onPressed: () => Navigator.pushNamed(context, '/resume'),
           icon: const Icon(Icons.rocket_launch),
-          label: const Text('View My Journey'),
+          label: const Text('View My Journey', style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.navigationRailIconColor,
             foregroundColor: Colors.white,
