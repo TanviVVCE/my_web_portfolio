@@ -348,9 +348,17 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                 child: Opacity(opacity: value, child: child),
               );
             },
-            child: ProjectCard(
-              project: filteredProjects[index],
-              onTap: () => _showProjectDetail(filteredProjects[index]),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: ProjectCard(
+                    project: filteredProjects[index],
+                    onTap: () => _showProjectDetail(filteredProjects[index]),
+                  ),
+                );
+              },
             ),
           );
         },

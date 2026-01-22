@@ -340,7 +340,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             color: AppColors.navigationRailBgColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.borderColor.withOpacity(0.3)),
-            boxShadow: WidgetCommons().boxShadowswithColors(),
+            // boxShadow: WidgetCommons().boxShadowswithColors(),
           ),
           child: Column(
             children: [

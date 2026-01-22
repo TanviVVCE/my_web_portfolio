@@ -23,7 +23,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController!.addListener(() {
       setState(() {
         _selectedTab = _tabController!.index;
@@ -106,7 +106,12 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
                   Expanded(
                     child: TabBarView(
                       controller: _tabController!,
-                      children: [_buildSkillsTab(), _buildExperienceTab(), _buildEducationTab()],
+                      children: [
+                        _buildSkillsTab(),
+                        _buildExperienceTab(),
+                        _buildEducationTab(),
+                        _buildVoluteeringTab(),
+                      ],
                     ),
                   ),
                 ],
@@ -300,6 +305,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
           Tab(icon: Icon(Icons.code), text: 'Skills'),
           Tab(icon: Icon(Icons.work), text: 'Experience'),
           Tab(icon: Icon(Icons.school), text: 'Education'),
+          Tab(icon: Icon(Icons.person), text: 'Volunteering'),
         ],
       ),
     );
@@ -466,6 +472,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
             ],
             color: Colors.blue,
           ),
+
           _buildTimelineItem(
             isFirst: false,
             isLast: false,
@@ -570,6 +577,64 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
           //   ],
           //   color: Colors.teal,
           // ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVoluteeringTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTimelineItem(
+            isFirst: true,
+            isLast: false,
+            title: 'Classroom Ambassador - Tech2U',
+            organization: 'University of Toronto',
+            period: '2025 - Present',
+            description: 'Worked as a technical support analyst for University',
+            points: [
+              'Tech2U Classroom Ambassador - Supported 600+ instructors with classroom technology, ensuring seamless teaching experiences',
+              'Deployed Whisper AI-based auto-captioning system aligned with professor feedback for improved accuracy',
+              'Managed classroom setups across 290+ instructional spaces, performing preventive maintenance and troubleshooting AV systems',
+              'Collaborated with Tech2U Co-Pilots and colleagues to standardize technology support procedures',
+            ],
+            color: AppColors.navigationRailIconColor,
+          ),
+          _buildTimelineItem(
+            isFirst: false,
+            isLast: false,
+            title: 'Exam Invigilator',
+            organization: 'University of Toronto',
+            period: '2025 - 2026',
+            description: 'Exam invigilator for Jackman Law College',
+            points: [
+              'Supervised and proctored in-person examinations to ensure academic integrity and compliance with university policies',
+              'Provided support to students requiring accommodations, ensuring an inclusive and equitable test-taking environment',
+              'Monitored exam sessions attentively to prevent academic misconduct and promptly addressed any irregularities',
+              'Coordinated with faculty and administrative staff to ensure smooth exam operations and adherence to procedures',
+              'Demonstrated strong attention to detail, time management, and the ability to remain calm and organized during high-pressure exam periods',
+            ],
+            color: Colors.purple,
+          ),
+          _buildTimelineItem(
+            isFirst: false,
+            isLast: true,
+            title: 'Event Coordinator',
+            organization: 'University of Toronto',
+            period: '2024 - 2026',
+            description: 'Helped in conducting events in University',
+            points: [
+              'Liaised with faculty, student groups, vendors, and campus services to ensure smooth event execution and alignment with university standards',
+              'Oversaw event timelines, registrations, and on-site operations, resolving issues in real time to ensure a positive attendee experience',
+              'Managed event registration processes, including sign-in desks, attendee lists, and on-site check-in to ensure efficient guest flow',
+              'Directed wayfinding and on-site navigation by coordinating signage, floor plans, and volunteer guidance to support attendee movement',
+              'Coordinated post-event wrap-up by collecting equipment, signage, and materials, ensuring all resources were returned, stored, or documented appropriately',
+            ],
+            color: Colors.teal,
+          ),
         ],
       ),
     );
