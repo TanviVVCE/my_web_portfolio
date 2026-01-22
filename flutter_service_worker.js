@@ -3,11 +3,11 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "7452318e71486c1febf6547c446c2a43",
+const RESOURCES = {"flutter_bootstrap.js": "86bee09b61344fc47e67711b5b53cc70",
 "version.json": "9b818ca9511483c901bed1545384376c",
 "index.html": "944cafd6079d88f186aa1f729ee33a96",
 "/": "944cafd6079d88f186aa1f729ee33a96",
-"main.dart.js": "9515e4b4f42d6b2f85c9ab3b306a0a9f",
+"main.dart.js": "bef8f3307ade429a4327ce4d223a32ea",
 "flutter.js": "24bc71911b75b5f8135c949e27a2984e",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
@@ -38,7 +38,7 @@ const RESOURCES = {"flutter_bootstrap.js": "7452318e71486c1febf6547c446c2a43",
 "assets/assets/images/projects/Brane.png": "5bb35d120d21b4c77c5094b19f0488d6",
 "assets/assets/resume/resume.pdf": "f2ae7230148f594a8b383c3ff3d59b78",
 "assets/assets/logos/github.svg": "86a06412a2ae8f9ae304d60a95aa6454",
-"assets/assets/logos/google.svg": "bf0346ad5fa18a11b27e808aef507fd9",
+"assets/assets/logos/google.svg": "992ac34a80cdd509871cff78c6d98e72",
 "assets/assets/logos/linkedin.svg": "15cf9ebef4a8ddc72756fd6d8d2be471",
 "assets/assets/logos/blog.svg": "a45a1e2b79900468e8693e002efe0f36",
 "assets/assets/fonts/Funnel-Regular.ttf": "4df7e3aab2826d3f03a81046960ff614",
