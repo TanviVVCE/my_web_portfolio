@@ -2,7 +2,7 @@ import 'dart:ui_web';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:my_portfolio/features/resume/resume.dart';
-import 'package:my_portfolio/features/blog/presentation/pages/blog_detail_page.dart';
+// import 'package:my_portfolio/features/blog/presentation/pages/blog_detail_page.dart';
 import 'package:my_portfolio/features/contact/contact_page.dart';
 import 'package:my_portfolio/features/home/home_page.dart';
 import 'package:my_portfolio/features/projects/presentation/pages/projects_page.dart';

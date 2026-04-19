@@ -19,8 +19,23 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   final List<String> _categories = ['All', 'Flutter', 'Mobile', 'AI/ML/GenAI', 'Backend', 'Web'];
 
   final List<Project> _projects = [
-    const Project(
+      const Project(
       id: '1',
+      title: 'AI-Powered PDF & Image to Markdown Web Application',
+      description:
+          'The primary objective of this project is to develop a full-stack web application that enables users to upload PDF and image files for automated information extraction.',
+      longDescription:
+          'The system leverages an open-weight OCR model to extract text and embedded images, converting the content into structured Markdown format. The processed results are packaged as downloadable ZIP files for user convenience.',
+      imageUrl: 'assets/images/projects/ai_web_app.jpg',
+      technologies: ['React', 'Typescript', 'AI/ML', 'Firebase', 'HugggingFace', 'Docker', 'Kubernetes', 'Digital Ocean'],
+      githubUrl: 'https://github.com/Zimo21/ece1724-project',
+      // liveUrl: 'https://tanvivvce.github.io/my_web_portfolio',
+      category: 'Web',
+      featured: true,
+    ),
+
+    const Project(
+      id: '2',
       title: 'My Web Portfolio',
       description:
           'A portfolio website built with Flutter Web, showcasing projects, skills, and professional experience.',
@@ -34,7 +49,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: true,
     ),
     const Project(
-      id: '2',
+      id: '3',
       title: 'Resume Swift',
       description: 'A resume making mobile application helping users select templates and modify resumes.',
       longDescription:
@@ -47,7 +62,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: true,
     ),
     const Project(
-      id: '3',
+      id: '4',
       title: 'G12',
       description: 'Mobile application helping international students connect with universities.',
       longDescription:
@@ -59,7 +74,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: false,
     ),
     const Project(
-      id: '4',
+      id: '5',
       title: 'GenAI Text to Speech',
       description: 'VQ-VAE based Generative AI application for text to speech synthesis.',
       longDescription:
@@ -71,7 +86,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: true,
     ),
     const Project(
-      id: '5',
+      id: '6',
       title: 'GPU-Accelerated Video Processing',
       description: 'Real-time video processing using CUDA parallel programming.',
       longDescription:
@@ -83,7 +98,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: true,
     ),
     const Project(
-      id: '6',
+      id: '7',
       title: 'Trade Crypto',
       description: 'Android app for real-time cryptocurrency analysis and trading.',
       longDescription: 'Native Android project supporting real-time cryptocurrency trading and market analysis.',
@@ -94,7 +109,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: false,
     ),
     const Project(
-      id: '7',
+      id: '8',
       title: 'Post Quantum Cryptography for VANETs',
       description: 'Quantum-resistant blockchains for vehicular communication.',
       longDescription:
@@ -106,7 +121,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: true,
     ),
     const Project(
-      id: '8',
+      id: '9',
       title: 'Telcel',
       description: 'Event management app with AI-based facial registration.',
       longDescription:
@@ -118,7 +133,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: false,
     ),
     const Project(
-      id: '9',
+      id: '10',
       title: 'Brane Task Manager',
       description: 'Task management app for Brane employees.',
       longDescription: 'Task management with priorities, deadlines, progress tracking, and local data persistence.',
@@ -129,7 +144,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: false,
     ),
     const Project(
-      id: '10',
+      id: '11',
       title: 'SDI Warehouse Management',
       description: 'Cross-platform warehouse management solution.',
       longDescription: 'Warehouse management app with Firebase Crashlytics improving debugging by 40%.',
@@ -140,7 +155,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       featured: false,
     ),
     const Project(
-      id: '11',
+      id: '12',
       title: 'WoofWhere - Pet Playdates App',
       description: 'React based web application',
       longDescription: 'Pet playdate arrangement application using React deployed over Kubernetes',

@@ -16,7 +16,6 @@ class ProjectsPage extends StatelessWidget {
       body: SafeArea(
         child: Row(
           children: [
-            // Side Navigation (Desktop only)
             !isMobile ? _buildSideNavigation(context) : _buildTopBar(context, isMobile),
             // Main Content
             Expanded(

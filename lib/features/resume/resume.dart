@@ -66,7 +66,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('❌ Error:  $e'), backgroundColor: Colors.red));
+          ).showSnackBar(SnackBar(content: Text('Error:  $e'), backgroundColor: Colors.red));
         }
       }
     }
@@ -76,7 +76,6 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Wait for TabController to be initialized
     if (_tabController == null) {
       return const Scaffold(
         backgroundColor: Color(0xFF17153B),
@@ -89,20 +88,12 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
       body: SafeArea(
         child: Row(
           children: [
-            // Left Sidebar - Profile & Navigation
             if (!isMobile) _buildDesktopSidebar(),
-
-            // Main Content Area
             Expanded(
               child: Column(
                 children: [
-                  // Top Navigation for Mobile
                   if (isMobile) _buildMobileHeader(),
-
-                  // Tab Navigation
                   _buildTabBar(),
-
-                  // Content
                   Expanded(
                     child: TabBarView(
                       controller: _tabController!,
@@ -459,6 +450,20 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
           _buildTimelineItem(
             isFirst: true,
             isLast: false,
+            title: 'Machine Learning Associate',
+            organization: 'Vector Institute',
+            period: 'May 2026 (Upcoming) - Present - Toronto',
+            description: 'Leading ML and Agentic AI development team and architecting scalable solutions using AWS',
+            points: [
+              'Developed a Machine Learning algorithm using XGBoost, LSTM for Solar Data forecasting, achieving 95% accuracy and reducing prediction errors by 30%',
+              'Architected and deployed an agentic AI system using Langchain and OpenAI APIs, automating complex workflows and improving efficiency by 40%',
+              'Managed project deployments and automated workflows using GitHub and GitHub Actions, while monitoring and debugging deployment issues to ensure smooth, reliable production releases.',
+            ],
+            color: Colors.purple,
+          ),
+          _buildTimelineItem(
+            isFirst: false,
+            isLast: false,
             title: 'Flutter Developer - Volunteering',
             organization: 'G12',
             period: 'Jan 2025 - May 2025 - Toronto',
@@ -534,7 +539,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
             isLast: false,
             title: 'Masters in Electrical and Computer Engineering',
             organization: 'University of Toronto',
-            period: '2024 - 2026',
+            period: 'August 2024 - May 2026',
             description: 'Specialization in Artificial Intelligence and Computer Engineering',
             points: [
               'MPAC Student Wing - Student Ambassador, University of Toronto - Collaborated with the MEng Graduate Office to enhance the overall experience for engineering students ',
