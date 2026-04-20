@@ -137,7 +137,7 @@ class ProjectsPage extends StatelessWidget {
             style: TextStyle(
               color: AppColors.fontColor,
               fontSize: isMobile ? 18 : 24,
-              fontWeight: FontWeight.bold,
+              // fontWeight: FontWeight.bold,
               fontFamily: 'AlfaSlabOne',
             ),
           ),

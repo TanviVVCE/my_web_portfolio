@@ -375,7 +375,15 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
             'Notion',
             'n8n',
             'Zendesk AI',
-          ], Colors.indigo),
+          ], Colors.orange),
+           _buildSkillCard('Agentic AI', Icons.web, [
+            'Langchain',
+            'Langgraph',
+            'Langsmith',
+            'n8n',
+            'Unsloth',
+            // 'Zendesk AI',
+          ], Colors.red),
         ],
       ),
     );
@@ -598,7 +606,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
             isLast: false,
             title: 'Classroom Ambassador - Tech2U',
             organization: 'University of Toronto',
-            period: '2025 - Present',
+            period: 'August 2025 - May 2026',
             description: 'Worked as a technical support analyst for University',
             points: [
               'Tech2U Classroom Ambassador - Supported 600+ instructors with classroom technology, ensuring seamless teaching experiences',
@@ -613,7 +621,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
             isLast: false,
             title: 'Exam Invigilator',
             organization: 'University of Toronto',
-            period: '2025 - 2026',
+            period: 'August 2025 - May 2026',
             description: 'Exam invigilator for Jackman Law College',
             points: [
               'Supervised and proctored in-person examinations to ensure academic integrity and compliance with university policies',
@@ -629,7 +637,7 @@ class _ResumeState extends State<Resume> with SingleTickerProviderStateMixin {
             isLast: true,
             title: 'Event Coordinator',
             organization: 'University of Toronto',
-            period: '2024 - 2026',
+            period: 'January 2025 - Present',
             description: 'Helped in conducting events in University',
             points: [
               'Liaised with faculty, student groups, vendors, and campus services to ensure smooth event execution and alignment with university standards',

@@ -214,7 +214,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                 'My Projects',
                 style: TextStyle(
                   fontSize: isMobile ? 24 : 32,
-                  fontWeight: FontWeight.bold,
+                  // fontWeight: FontWeight.bold,
                   color: AppColors.fontColor,
                   fontFamily: 'AlfaSlabOne',
                 ),

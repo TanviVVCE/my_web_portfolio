@@ -255,7 +255,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           'Tanvi Virappa Patil',
           style: TextStyle(
             fontSize: isMobile ? 36 : 56,
-            fontWeight: FontWeight.bold,
+            // fontWeight: FontWeight.bold,
             color: AppColors.fontColor,
             fontFamily: 'AlfaSlabOne',
             height: 1.2,
@@ -313,7 +313,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       speed: const Duration(milliseconds: 100),
       textStyle: TextStyle(
         fontSize: isMobile ? 24 : 40,
-        fontWeight: FontWeight.bold,
+        // fontWeight: FontWeight.bold,
         color: color,
         fontFamily: 'AlfaSlabOne',
       ),
@@ -471,7 +471,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             '🎯 Current Focus',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              // fontWeight: FontWeight.bold,
               color: AppColors.fontColor,
               fontFamily: 'AlfaSlabOne',
             ),
@@ -535,7 +535,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 'About Me',
                 style: TextStyle(
                   fontSize: isMobile ? 24 : 28,
-                  fontWeight: FontWeight.bold,
+                  // fontWeight: FontWeight.bold,
                   color: AppColors.fontColor,
                   fontFamily: 'AlfaSlabOne',
                 ),
@@ -609,7 +609,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: const Text('View My Projects', style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.navigationRailIconColor,
-            foregroundColor: Colors.white,
+            foregroundColor: Colors.black,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
             minimumSize: Size(isMobile ? double.infinity : 250, 56),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -654,7 +654,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: const Text('View My Journey', style: TextStyle(fontWeight: FontWeight.bold)),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.navigationRailIconColor,
-            foregroundColor: Colors.white,
+            foregroundColor: Colors.black,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
             minimumSize: Size(isMobile ? double.infinity : 250, 56),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -732,7 +732,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   svgPath,
                   width: 28,
                   height: 28,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                  colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
                 ),
               ),
             ),
