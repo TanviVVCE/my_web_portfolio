@@ -34,7 +34,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web App
-        run: flutter build web --release --base-href /my_web_portfolio/ --web-renderer canvaskit
+        run: flutter build web --release --base-href /my_web_portfolio/
 
       - name: Verify build output
         run: |
